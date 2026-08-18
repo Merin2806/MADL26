@@ -1,0 +1,195 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+void main() {
+  runApp(const EventRegistrationApp());
+}
+
+class RegistrationData extends ChangeNotifier {
+  String _name = "";
+  String _email = "";
+  String _password = "";
+  String? _course;
+  String _gender = "Male";
+  bool _acceptTerms = false;
+  bool _showPassword = false;
+
+  String get name => _name;
+  String get email => _email;
+  String get password => _password;
+  String? get course => _course;
+  String get gender => _gender;
+  bool get acceptTerms => _acceptTerms;
+  bool get showPassword => _showPassword;
+
+  void updateName(String val) { _name = val; notifyListeners(); }
+  void updateEmail(String val) { _email = val; notifyListeners(); }
+  void updatePassword(String val) { _password = val; notifyListeners(); }
+  void updateCourse(String? val) { _course = val; notifyListeners(); }
+  void updateGender(String val) { _gender = val; notifyListeners(); }
+  void updateTerms(bool val) { _acceptTerms = val; notifyListeners(); }
+  void togglePasswordVisibility() { _showPassword = !_showPassword; notifyListeners(); }
+}
+
+class EventRegistrationApp extends StatelessWidget {
+  const EventRegistrationApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ChangeNotifierProvider<RegistrationData>(
+      create: (_) => RegistrationData(),
+      builder: (context, _) => MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          inputDecorationTheme: const InputDecorationTheme(
+            filled: true,
+            border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+          ),
+        ),
+        home: const RegistrationScreen(),
+      ),
+    );
+  }
+}
+
+class RegistrationScreen extends StatefulWidget {
+  const RegistrationScreen({super.key});
+
+  @override
+  State<RegistrationScreen> createState() => _RegistrationScreenState();
+}
+
+class _RegistrationScreenState extends State<RegistrationScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late TextEditingController _nameController;
+  late TextEditingController _emailController;
+  late TextEditingController _passwordController;
+
+  @override
+  void initState() {
+    super.initState();
+    final data = Provider.of<RegistrationData>(context, listen: false);
+    _nameController = TextEditingController(text: data.name);
+    _emailController = TextEditingController(text: data.email);
+    _passwordController = TextEditingController(text: data.password);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final data = Provider.of<RegistrationData>(context);
+
+    return Scaffold(
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(title: const Text("Event Registration")),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 500),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("Register for Tech Summit 2025", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  const Text("Fill out the details below to secure your spot."),
+                  const SizedBox(height: 24),
+                  
+                  TextFormField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(labelText: "Full Name", prefixIcon: Icon(Icons.person_outline)),
+                    onChanged: data.updateName,
+                    validator: (v) => (v?.isEmpty ?? true) ? "Required" : null,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  TextFormField(
+                    controller: _emailController,
+                    decoration: const InputDecoration(labelText: "Email Address", prefixIcon: Icon(Icons.email_outlined)),
+                    onChanged: data.updateEmail,
+                    validator: (v) => (v?.contains('@') ?? false) ? null : "Enter valid email",
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  TextFormField(
+                    controller: _passwordController,
+                    obscureText: !data.showPassword,
+                    decoration: InputDecoration(
+                      labelText: "Password",
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(data.showPassword ? Icons.visibility_off : Icons.visibility),
+                        onPressed: data.togglePasswordVisibility,
+                      ),
+                    ),
+                    onChanged: data.updatePassword,
+                    validator: (v) => (v?.length ?? 0) < 6 ? "Minimum 6 characters" : null,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  DropdownButtonFormField<String>(
+                    decoration: const InputDecoration(labelText: "Preferred Workshop", prefixIcon: Icon(Icons.school_outlined)),
+                    value: data.course,
+                    items: const [
+                      DropdownMenuItem(value: "Flutter", child: Text("Flutter")),
+                      DropdownMenuItem(value: "AI", child: Text("Artificial Intelligence")),
+                    ],
+                    onChanged: data.updateCourse,
+                  ),
+                  const SizedBox(height: 16),
+                  
+                  const Text("Gender", style: TextStyle(fontWeight: FontWeight.w600)),
+                  Wrap(
+                    children: ["Male", "Female", "Other"].map<Widget>((g) => SizedBox(
+                      width: 150,
+                      child: RadioListTile<String>(
+                        title: Text(g),
+                        value: g,
+                        groupValue: data.gender,
+                        onChanged: (v) => data.updateGender(v!),
+                      ),
+                    )).toList(),
+                  ),
+                  
+                  CheckboxListTile(
+                    title: const Text("I agree to event terms and privacy policy"),
+                    value: data.acceptTerms,
+                    onChanged: (v) => data.updateTerms(v!),
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                  const SizedBox(height: 24),
+                  
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: FilledButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate() && data.acceptTerms) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Registration Successful!")));
+                        } else if (!data.acceptTerms) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please accept terms.")));
+                        }
+                      },
+                      child: const Text("COMPLETE REGISTRATION"),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
