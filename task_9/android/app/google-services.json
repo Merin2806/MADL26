@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "136198181516",
+    "firebase_url": "https://flutter-student-database-2835e-default-rtdb.firebaseio.com",
+    "project_id": "flutter-student-database-2835e",
+    "storage_bucket": "flutter-student-database-2835e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:136198181516:android:76e231ba6bd5c3fbfe61a9",
+        "android_client_info": {
+          "package_name": "com.example.firebase_database_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9kwLvEJ0SZZ0S4eE7BLJ5oJIwWnBr4wc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
